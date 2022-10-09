@@ -1,0 +1,13 @@
+{
+	"name": "Youtube Sorter",
+	"description": "Extension to sort youtube videos by duration",
+	"version": "1.0.0",
+	"manifest_version": 3,
+	"permissions": ["activeTab", "tabs", "scripting", "tabGroups"],
+	"host_permissions": ["https://www.youtube.com/*"],
+	"action": {
+		"default_title": "Youtube Sorter",
+		"default_icon": "favicon.png",
+		"default_popup": "index.html"
+	}
+}
