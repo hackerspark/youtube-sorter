@@ -15,25 +15,54 @@ export function hasVideoScript(): boolean {
 	return !!document.querySelector('video[src]');
 }
 
+export function isDummyTabScript(): boolean {
+	return !document.querySelector('body');
+}
+
 /* Executors */
 export async function tabHasVideo(tab: chrome.tabs.Tab): Promise<boolean> {
-	const [{ result: hasVideo }] = await chrome.scripting.executeScript({
-		target: {
-			tabId: tab.id!
-		},
-		func: hasVideoScript
-	});
+	let hasVideo = false;
+	try {
+		[{ result: hasVideo }] = await chrome.scripting.executeScript({
+			target: {
+				tabId: tab.id!
+			},
+			func: hasVideoScript
+		});
+	} catch (e) {
+		console.log(e);
+	}
 	return hasVideo;
 }
 
 export async function extractTabVideoDuration(tab: chrome.tabs.Tab): Promise<number> {
-	const [{ result: duration }] = await chrome.scripting.executeScript({
-		target: {
-			tabId: tab.id!
-		},
-		func: extractVideoDurationScript
-	});
+	let duration = 0;
+	try {
+		[{ result: duration }] = await chrome.scripting.executeScript({
+			target: {
+				tabId: tab.id!
+			},
+			func: extractVideoDurationScript
+		});
+	} catch (e) {
+		console.log(e);
+	}
 	return duration;
+}
+
+export async function isDummyTab(tab: chrome.tabs.Tab): Promise<boolean> {
+	let isDummy = true;
+	try {
+		[{ result: isDummy }] = await chrome.scripting.executeScript({
+			target: {
+				tabId: tab.id!
+			},
+			func: isDummyTabScript
+		});
+	} catch (e) {
+		console.log(e);
+	}
+	return isDummy;
 }
 
 /* Utils */
@@ -53,7 +82,7 @@ export async function segregateYoutubeTabs(tabs: chrome.tabs.Tab[]): Promise<Tab
 	};
 
 	for (const tab of tabs) {
-		if (tab.discarded) {
+		if (tab.discarded || tab.status !== 'complete' || (await isDummyTab(tab))) {
 			segregation.discardedTabs.push(tab);
 		} else if (tab.status === 'complete') {
 			if (await tabHasVideo(tab)) {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { YOUTUBE_URL_PATTERN, sortGroupYoutubeTabs } from '$lib/utils';
+	import { PUBLIC_RUN_MODE } from '$env/static/public';
 
 	let loading = true;
 	async function runExtension() {
@@ -9,6 +10,10 @@
 
 	runExtension();
 </script>
+
+{#if PUBLIC_RUN_MODE === 'development'}
+	<button on:click={runExtension}>Debug</button>
+{/if}
 
 {#if loading}
 	<div class="loader" />
