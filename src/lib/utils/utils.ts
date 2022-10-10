@@ -19,6 +19,10 @@ export function isDummyTabScript(): boolean {
 	return !document.querySelector('body');
 }
 
+export function pauseVideoScript(): void {
+	(document.querySelector('video[src]') as HTMLVideoElement)?.pause();
+}
+
 /* Executors */
 export async function tabHasVideo(tab: chrome.tabs.Tab): Promise<boolean> {
 	let hasVideo = false;
@@ -63,6 +67,19 @@ export async function isDummyTab(tab: chrome.tabs.Tab): Promise<boolean> {
 		console.log(e);
 	}
 	return isDummy;
+}
+
+export async function pauseVideo(tab: chrome.tabs.Tab): Promise<void> {
+	try {
+		await chrome.scripting.executeScript({
+			target: {
+				tabId: tab.id!
+			},
+			func: pauseVideoScript
+		});
+	} catch (e) {
+		console.log(e);
+	}
 }
 
 /* Utils */
@@ -133,6 +150,16 @@ export async function moveTabs(tabs: chrome.tabs.Tab[]): Promise<chrome.tabs.Tab
 }
 
 /* Orchestrators */
+export async function pauseYoutubeVideos(urlPattern: string) {
+	/* Process tabs */
+	const tabs = await getAllYoutubeTabs(urlPattern);
+	const tabSegregation: TabSegregation = await segregateYoutubeTabs(tabs);
+
+	for (const tab of tabSegregation.videoTabs) {
+		await pauseVideo(tab);
+	}
+}
+
 export async function sortGroupYoutubeTabs(urlPattern: string) {
 	/* Process tabs */
 	const tabs = await getAllYoutubeTabs(urlPattern);

@@ -1,23 +1,27 @@
 <script lang="ts">
-	import { YOUTUBE_URL_PATTERN, sortGroupYoutubeTabs } from '$lib/utils';
-	import { PUBLIC_RUN_MODE } from '$env/static/public';
+	import { YOUTUBE_URL_PATTERN, sortGroupYoutubeTabs, pauseYoutubeVideos } from '$lib/utils';
 
-	let loading = true;
-	async function runExtension() {
+	let processing = false;
+
+	async function runSortGroup() {
+		processing = true;
 		await sortGroupYoutubeTabs(YOUTUBE_URL_PATTERN);
-		loading = false;
+		processing = false;
 	}
 
-	runExtension();
+	async function runPauseVideos() {
+		processing = true;
+		await pauseYoutubeVideos(YOUTUBE_URL_PATTERN);
+		processing = false;
+	}
 </script>
 
-{#if PUBLIC_RUN_MODE === 'development'}
-	<button on:click={runExtension}>Debug</button>
-{/if}
-
-{#if loading}
+{#if processing}
 	<div class="loader" />
 {/if}
+
+<button on:click={runSortGroup} disabled={processing}>Sort & Group</button>
+<button on:click={runPauseVideos} disabled={processing}>Pause Videos</button>
 
 <style>
 	@keyframes spin {

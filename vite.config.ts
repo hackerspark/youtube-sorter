@@ -4,7 +4,7 @@ import type { UserConfig } from 'vite';
 const config: UserConfig = {
 	plugins: [sveltekit()],
 	build: {
-		sourcemap: process.env.PUBLIC_RUN_MODE === 'development' ? 'inline' : false
+		sourcemap: false
 	}
 };
 
