@@ -115,16 +115,14 @@ export async function segregateYoutubeTabs(tabs: chrome.tabs.Tab[]): Promise<Tab
 export async function getVideoTabDurationDetails(
 	tabs: chrome.tabs.Tab[]
 ): Promise<VideoTabDuration[]> {
-	const videoTabDurationDetails: VideoTabDuration[] = [];
-	let duration;
-	for (const tab of tabs) {
-		duration = await extractTabVideoDuration(tab);
-		videoTabDurationDetails.push({
+	const promises = tabs.map(async (tab: chrome.tabs.Tab) => {
+		const duration = await extractTabVideoDuration(tab);
+		return {
 			tab,
 			duration
-		});
-	}
-	return videoTabDurationDetails;
+		};
+	});
+	return await Promise.all(promises);
 }
 
 export function sortVideoTabDurationDetails(
@@ -155,9 +153,7 @@ export async function pauseYoutubeVideos(urlPattern: string) {
 	const tabs = await getAllYoutubeTabs(urlPattern);
 	const tabSegregation: TabSegregation = await segregateYoutubeTabs(tabs);
 
-	for (const tab of tabSegregation.videoTabs) {
-		await pauseVideo(tab);
-	}
+	Promise.all(tabSegregation.videoTabs.map(async (tab: chrome.tabs.Tab) => await pauseVideo(tab)));
 }
 
 export async function sortGroupYoutubeTabs(urlPattern: string) {
